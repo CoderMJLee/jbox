@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="PROFILE" source="spring.profiles.active"/>
+    <!-- 传递到代码中使用 -->
+    <springProperty scope="context" name="LOG_PATH" source="mj-web.path.log"/>
+    <springProperty scope="context" name="BASE_PKG" source="pkg.base"/>
+    <!-- 日志类包名 -->
+    <property name="LOG_MJ_PKG" value="io.github.codermjlee.common.log"/>
+
+    <if condition='property("PROFILE").contains("pro")'>
+        <then>
+            <appender
+                name="INFO"
+                class="io.github.codermjlee.common.log.appender.ProInfoAppender">
+                <encoder class="${LOG_MJ_PKG}.encoder.ProEncoder"/>
+                <rollingPolicy class="${LOG_MJ_PKG}.policy.ProInfoPolicy"/>
+                <filter class="${LOG_MJ_PKG}.filter.ProInfoFilter"/>
+            </appender>
+
+            <appender
+                name="WARN"
+                class="io.github.codermjlee.common.log.appender.ProWarnAppender">
+                <encoder class="${LOG_MJ_PKG}.encoder.ProEncoder"/>
+                <rollingPolicy class="${LOG_MJ_PKG}.policy.ProWarnPolicy"/>
+                <filter class="${LOG_MJ_PKG}.filter.ProWarnFilter"/>
+            </appender>
+
+            <appender
+                name="ERROR"
+                class="io.github.codermjlee.common.log.appender.ProErrorAppender">
+                <encoder class="${LOG_MJ_PKG}.encoder.ProEncoder"/>
+                <rollingPolicy class="${LOG_MJ_PKG}.policy.ProErrorPolicy"/>
+                <filter class="${LOG_MJ_PKG}.filter.ProErrorFilter"/>
+            </appender>
+
+            <appender
+                name="asyncINFO"
+                class="io.github.codermjlee.common.log.appender.ProAsyncAppender">
+                <appender-ref ref="INFO"/>
+            </appender>
+            <appender
+                name="asyncWARN"
+                class="io.github.codermjlee.common.log.appender.ProAsyncAppender">
+                <appender-ref ref="WARN"/>
+            </appender>
+            <appender
+                name="asyncERROR"
+                class="io.github.codermjlee.common.log.appender.ProAsyncAppender">
+                <appender-ref ref="ERROR"/>
+            </appender>
+
+            <logger name="${BASE_PKG}" level="INFO" additivity="false">
+                <appender-ref ref="asyncINFO"/>
+                <appender-ref ref="asyncWARN"/>
+                <appender-ref ref="asyncERROR"/>
+            </logger>
+
+            <root level="ERROR">
+                <appender-ref ref="asyncERROR"/>
+            </root>
+        </then>
+        <else>
+            <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="${LOG_MJ_PKG}.encoder.DevEncoder"/>
+            </appender>
+
+            <logger name="${BASE_PKG}" level="DEBUG" additivity="false">
+                <appender-ref ref="console"/>
+            </logger>
+
+            <root level="ERROR">
+                <appender-ref ref="console"/>
+            </root>
+        </else>
+    </if>
+</configuration>
